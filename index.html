@@ -4,7 +4,7 @@
 <meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Executive Console — mockup v4</title>
+<title>Executive Console — mockup v5</title>
 <style>
   :root{
     --bg:#f7f6f3; --panel:#ffffff; --ink:#1c1c1e; --ink-2:#6e6e73; --ink-3:#a1a1a6;
@@ -140,6 +140,46 @@
   .repo-row:hover{background:#efede9;color:var(--ink)}
   .repo-row.active{background:var(--accent-soft);color:var(--accent);font-weight:600}
   .repo-row .r-d{font-size:10px;color:var(--ink-3)}
+  /* v5: kanban, tabs, timeline, artifacts, dnd */
+  .tabs{display:flex;gap:4px;margin-bottom:13px}
+  .tab{font-size:12px;font-weight:700;padding:6px 14px;border-radius:99px;cursor:pointer;color:var(--ink-2);user-select:none}
+  .tab.on{background:var(--ink);color:#fff}
+  .kanban{display:flex;gap:12px;align-items:flex-start;overflow-x:auto;padding-bottom:8px}
+  .kcol{background:#f1efe9;border-radius:14px;padding:10px;min-width:238px;flex:1}
+  .kcol.dragover{outline:2px dashed var(--accent);outline-offset:2px}
+  .kcol .k-h{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);padding:2px 6px 9px;display:flex;justify-content:space-between}
+  .kcol .card{margin-bottom:9px}
+  .card.dragging{opacity:.45}
+  .art-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:11px}
+  .art-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:13px 15px;cursor:pointer;transition:box-shadow .12s}
+  .art-card:hover{box-shadow:0 3px 14px rgba(0,0,0,.07)}
+  .art-card .a-kind{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:5px}
+  .art-card .a-title{font-size:12.5px;font-weight:650;line-height:1.35;margin-bottom:4px}
+  .art-card .a-src{font-size:11px;color:var(--ink-3)}
+  /* timeline (task panel left) */
+  .tl{position:relative;padding-left:26px}
+  .tl::before{content:'';position:absolute;left:9px;top:8px;bottom:8px;width:2px;background:var(--line)}
+  .tl-item{position:relative;margin-bottom:14px}
+  .tl-item .tl-dot{position:absolute;left:-22px;top:5px;width:10px;height:10px;border-radius:50%;background:#d5d2ca;border:2px solid var(--panel)}
+  .tl-item.sent .tl-dot{background:var(--accent)} .tl-item.recv .tl-dot{background:var(--good)} .tl-item.human .tl-dot{background:var(--human)}
+  .tl-item .tl-meta{font-size:11px;color:var(--ink-3);margin-bottom:4px}
+  .tl-item .tl-meta b{color:var(--ink);font-size:12px}
+  .mail{border:1px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden}
+  .mail .mail-h{padding:9px 13px;cursor:pointer;display:flex;justify-content:space-between;gap:8px;align-items:center}
+  .mail .mail-h:hover{background:#faf9f6}
+  .mail .m-sub{font-size:12.5px;font-weight:650}
+  .mail .m-dir{font-size:10px;font-weight:800;letter-spacing:.05em;padding:2px 8px;border-radius:99px}
+  .m-dir.out{background:var(--accent-soft);color:var(--accent)} .m-dir.in{background:var(--good-soft);color:var(--good)}
+  .mail .mail-b{display:none;border-top:1px solid var(--line);padding:11px 14px;font-size:12.5px;line-height:1.6;background:#fbfaf8}
+  .mail.open .mail-b{display:block}
+  .tl-note{font-size:12.5px;color:var(--ink-2)}
+  .t-side{width:300px}
+  .side-check .s-item{padding:6px 0;font-size:12.5px}
+  .side-sec{font-size:10.5px;font-weight:800;letter-spacing:.07em;color:var(--ink-3);text-transform:uppercase;margin:16px 0 7px}
+  .fields-compact{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;margin-bottom:4px}
+  .repo-row[draggable]{cursor:grab}
+  .agent-h.dragover,.org.dragover{outline:2px dashed var(--accent);outline-offset:1px;border-radius:8px}
+  .showmore{font-size:11px;color:var(--accent);font-weight:700;padding:4px 10px 6px 26px;cursor:pointer}
   /* task detail (ClickUp-grade) */
   .sheet-bg{position:fixed;inset:0;background:rgba(28,28,30,.38);display:none;align-items:center;justify-content:center;z-index:20;padding:20px}
   .sheet-bg.open{display:flex}
@@ -217,7 +257,7 @@
 
 <div class="sheet-bg" id="sheetBg"><div class="sheet" id="sheet"></div></div>
 <div class="banner" id="banner">Delivered to the live session — exactly once</div>
-<div class="mock-tag">MOCKUP v4 · executive-agent-gui</div>
+<div class="mock-tag">MOCKUP v5 · executive-agent-gui</div>
 
 <script>
 const CHECK5=['draft','approved','sent','reply received','data extracted'];
@@ -420,6 +460,23 @@ const DATA={
     engine:[
       ['tool.bash','suppressed: routine','test suite green 42/42']
     ]},
+  presence:{org:'Growing Mindfully',name:'Presence Portal',agent:'Gm-Kindred',role:'Family presence & communication portal',
+    needs:'Nothing needed from you right now.',needsClear:true,
+    phases:[
+      {name:'Concept + mockups',meta:'Done',pct:100,state:'active'},
+      {name:'Build',meta:'Waiting',pct:0,state:'waiting'},
+      {name:'Your review',meta:'Comes to you',pct:0,state:'human'}
+    ],
+    overall:'34%',remaining:'<b>Build phase</b> gated on kindred directors module shipping',
+    boardTitle:'Concept + mockups',
+    tasks:[
+      task('Presence concept mockup',3,'complete · <span class="next">reviewed</span>',['wireframe','mock data','review']),
+      task('Family-facing view spec',1,'<span class="next">next: privacy pass</span>',['draft','privacy pass','approve'])
+    ],
+    msgs:[
+      {who:'Gm-Kindred · last week',html:'Presence portal mockups are approved; the build slot opens once the directors module ships on Kindred.'}
+    ],
+    engine:[['tool.figma','suppressed: routine','mock export']]},
   gmweb:{org:'Growing Mindfully',name:'Website',agent:'Gm-Website',role:'growingmindfully.org — pages, SEO, waitlist',
     needs:'Nothing needed from you right now.',needsClear:true,
     phases:[
@@ -444,10 +501,10 @@ const DATA={
 };
 
 const REPO_IMPORT={"General":{"Fleet":[{"r":"miscellaneous","d":"2026-07-15"},{"r":"claude-config","d":"2026-07-15"},{"r":"skills-registry","d":"2026-07-15"},{"r":"claudecode-bar","d":"2026-07-15"},{"r":"executive-agent-gui","d":"2026-07-15"},{"r":"twofa-yubi-relay","d":"2026-07-15"},{"r":"dream-cycle","d":"2026-07-15"},{"r":"slack-agent-bridge","d":"2026-07-15"},{"r":"agentstack","d":"2026-07-15"},{"r":"executive-agent-mobile","d":"2026-07-15"},{"r":"knowledge","d":"2026-07-15"},{"r":"session-chief","d":"2026-07-14"},{"r":"teamclaude-fleet","d":"2026-07-14"},{"r":"automations-dashboard","d":"2026-07-14"},{"r":"system-audit","d":"2026-07-14"},{"r":"openclaw-skills","d":"2026-07-14"},{"r":"ops-tracker","d":"2026-07-13"},{"r":"claude-codex","d":"2026-07-10"},{"r":"pal-mcp-server","d":"2026-07-09"},{"r":"mini-macbook-parity-infra","d":"2026-07-04"},{"r":"approval-queue","d":"2026-07-04"},{"r":"claude-config-backup","d":"2026-06-30"},{"r":"agentsd","d":"2026-06-29"},{"r":"oauth-switch","d":"2026-06-26"},{"r":"lossless-snapshot-poc","d":"2026-06-26"},{"r":"clawdia-bar","d":"2026-06-26"},{"r":"conductor-playground","d":"2026-06-24"},{"r":"Starter-Project","d":"2026-06-24"},{"r":"even-bar-bridge","d":"2026-06-23"},{"r":"rock-agent","d":"2026-06-22"},{"r":"claudecode-bar-audit","d":"2026-06-21"},{"r":"brain","d":"2026-06-21"},{"r":"agent-loop-proof","d":"2026-06-20"},{"r":"lifeos","d":"2026-06-20"},{"r":"session-index","d":"2026-06-20"},{"r":"robostrategy","d":"2026-06-20"},{"r":"fieldy-clawdia","d":"2026-06-20"},{"r":"keeper","d":"2026-06-19"},{"r":"wgm-incubator","d":"2026-06-19"},{"r":"synos-liveness","d":"2026-06-19"},{"r":"style-lab","d":"2026-06-19"},{"r":"recruiting","d":"2026-06-19"},{"r":"pai-observatory","d":"2026-06-19"},{"r":"new-lead","d":"2026-06-19"},{"r":"network","d":"2026-06-19"},{"r":"iphone-clone","d":"2026-06-19"},{"r":"instacart-skill","d":"2026-06-19"},{"r":"instacart-order","d":"2026-06-19"},{"r":"docusign-onboarding","d":"2026-06-19"},{"r":"clawdia-atlas","d":"2026-06-19"},{"r":"arthur-av","d":"2026-06-19"},{"r":"antisybil","d":"2026-06-19"},{"r":"learning-engine","d":"2026-06-19"},{"r":"ops-vis-820a3a230523fd07","d":"2026-06-18"},{"r":"atlas","d":"2026-06-18"},{"r":"command-center","d":"2026-06-18"},{"r":"dotfiles","d":"2026-06-17"},{"r":"winn-ai-labs","d":"2026-06-15"},{"r":"operations","d":"2026-06-15"},{"r":"field-2026-06","d":"2026-06-10"},{"r":"inboxzero-business","d":"2026-06-03"},{"r":"winn-analytics","d":"2026-06-03"},{"r":"winn-solutions-sandbox","d":"2026-06-03"},{"r":"winn-telegram-bot","d":"2026-06-03"},{"r":"salon-sync","d":"2026-06-03"},{"r":"winn-helm-charts","d":"2026-06-03"},{"r":"review-shield","d":"2026-06-03"},{"r":"winn-do-cluster-ops","d":"2026-06-03"},{"r":"winn-chowfun","d":"2026-06-03"},{"r":"winn-cloud_git-source","d":"2026-06-03"},{"r":"socialytics","d":"2026-06-03"},{"r":".github","d":"2026-06-03"},{"r":"revive-leads","d":"2026-06-03"},{"r":"quotefast-ai","d":"2026-06-03"},{"r":"property-pilot","d":"2026-06-03"},{"r":"pulse-pto","d":"2026-06-03"},{"r":"practice-ai","d":"2026-06-03"},{"r":"openclaw-overview","d":"2026-06-03"},{"r":"plate-ai","d":"2026-06-03"},{"r":"nevermiss-ai","d":"2026-06-03"},{"r":"collect-flow","d":"2026-06-03"},{"r":"memphis-k8s","d":"2026-06-03"},{"r":"compliance-guard","d":"2026-06-03"},{"r":"hirebot-ai","d":"2026-06-03"},{"r":"garage-ai","d":"2026-06-03"},{"r":"fitretain-ai","d":"2026-06-03"},{"r":"cookbook-web","d":"2026-06-03"},{"r":"content-pilot","d":"2026-06-03"},{"r":"distrobot-ai","d":"2026-06-03"},{"r":"adpilot-ai","d":"2026-06-03"},{"r":"app","d":"2026-06-03"},{"r":"auth-policies","d":"2026-06-03"},{"r":"brief-2026-06","d":"2026-06-03"},{"r":"buildflow-ai","d":"2026-06-03"},{"r":"caseflow-ai","d":"2026-06-03"},{"r":"booksolid","d":"2026-06-03"},{"r":"candy-code","d":"2026-05-28"},{"r":"code-canyon","d":"2026-05-28"}],"Arcade":[{"r":"arya-platform","d":"2026-07-15"},{"r":"myquests","d":"2026-07-15"},{"r":"cornquest","d":"2026-07-15"},{"r":"arya","d":"2026-07-14"},{"r":"questboard","d":"2026-06-22"}],"Archive":[{"r":"fleet-constraints-8074c9","d":"2026-07-15"},{"r":"agent-os-kit-599483d8","d":"2026-07-15"},{"r":"afx-proposal-303064","d":"2026-07-15"},{"r":"exec-console-mock-87a6e6","d":"2026-07-15"},{"r":"nda-review-5bf6ab","d":"2026-07-14"},{"r":"workflow-comparison-c85dfe","d":"2026-07-14"},{"r":"presence-mockup-1732d6","d":"2026-07-14"},{"r":"drake-hootl-demo-d6c77d","d":"2026-07-14"},{"r":"myquests-demo-c2e719","d":"2026-07-14"},{"r":"voyage-plan-f23430","d":"2026-07-13"},{"r":"gm-fee-concept-9f91fa","d":"2026-07-08"},{"r":"anchorage-deck-3662c8","d":"2026-07-07"},{"r":"gm-email-preview-830584","d":"2026-07-06"},{"r":"gm-campaign-review-b6ed66","d":"2026-07-05"},{"r":"gm-avail-review-ccef9b","d":"2026-07-04"},{"r":"agentos-book-54a800","d":"2026-06-24"},{"r":"whiteroom-demo-69e3a4","d":"2026-06-24"},{"r":"provenance-version-ledger-e1fb97","d":"2026-06-21"},{"r":"estate-map-3f328f","d":"2026-06-20"},{"r":"gm-v2-waitlist-review-70a74c","d":"2026-06-20"},{"r":"gm-v2-waitlist-review-366942","d":"2026-06-20"},{"r":"belief-hub-72fca7","d":"2026-06-12"},{"r":"agentic-flow-480f13","d":"2026-06-12"},{"r":"convergence-comparator-d7d541","d":"2026-06-12"},{"r":"field-b8e4d1","d":"2026-06-10"},{"r":"field-3f2268","d":"2026-06-10"},{"r":"gm-enrollment-mockup-695623","d":"2026-06-10"},{"r":"brief-61093e","d":"2026-06-03"},{"r":"rs-brief-c2a7af","d":"2026-06-03"},{"r":"cg-field-report-e9a9e0","d":"2026-06-03"}],"Drake":[{"r":"drake","d":"2026-07-15"},{"r":"winn-insurance","d":"2026-07-15"},{"r":"policy-pilot","d":"2026-07-14"}],"Hestia":[{"r":"house-ops","d":"2026-07-14"},{"r":"home-automation","d":"2026-07-04"},{"r":"span","d":"2026-06-22"}],"Aide":[{"r":"doordash-orders","d":"2026-07-12"},{"r":"recall-notetaker","d":"2026-07-09"},{"r":"automate-my-life","d":"2026-06-22"},{"r":"got-clean-4k","d":"2026-06-21"}]},"Winn.solutions":{"Atlas":[{"r":"agent-os-dataroom","d":"2026-07-15"},{"r":"agent-os-foundation","d":"2026-07-15"},{"r":"anchorage-workspace","d":"2026-07-14"},{"r":"allan-showcase-video","d":"2026-07-14"},{"r":"anchorage-sprint-ssot","d":"2026-07-14"},{"r":"Winnsolutionsadmin.github.io","d":"2026-07-12"},{"r":"anchorage-agentic-preview","d":"2026-07-07"},{"r":"allan-ai-demos","d":"2026-07-07"},{"r":"client-style-guides","d":"2026-07-03"},{"r":"winn-solutions-site","d":"2026-06-30"},{"r":"anchorage-sprint1-docdriven","d":"2026-06-24"},{"r":"anchorage-deck-feedback","d":"2026-06-24"},{"r":"anchorage-review-console","d":"2026-06-22"},{"r":"coingecko-client","d":"2026-06-19"},{"r":"coingecko-advisory","d":"2026-06-19"}],"Hermes":[{"r":"hermes-chase","d":"2026-07-14"},{"r":"winn-ventures-ops","d":"2026-07-12"},{"r":"gusto","d":"2026-07-12"},{"r":"fender-mortgage-refi","d":"2026-07-03"},{"r":"upexi","d":"2026-06-22"},{"r":"coalition","d":"2026-06-22"}],"Fielder":[{"r":"belief-field-platform","d":"2026-07-02"},{"r":"sm-belief-field","d":"2026-06-23"},{"r":"jarred-belief-universe-3d","d":"2026-06-22"},{"r":"jarred-belief-field-map","d":"2026-06-22"},{"r":"belief-system-map","d":"2026-06-19"},{"r":"jarred-belief-field","d":"2026-06-19"},{"r":"jarred-belief-universe","d":"2026-06-17"},{"r":"jarred-belief-connection-map","d":"2026-06-17"},{"r":"belief-field","d":"2026-06-15"},{"r":"intern-belief-field","d":"2026-06-10"}]},"Growing Mindfully":{"Gm-Website":[{"r":"gm-waitlist","d":"2026-07-15"},{"r":"growingmindfully","d":"2026-07-15"},{"r":"gm-master","d":"2026-07-14"},{"r":"gm-waitlist-audit","d":"2026-06-30"},{"r":"growingmindfully-website","d":"2026-06-19"}],"Gm-Kindred":[{"r":"solace-api","d":"2026-07-15"},{"r":"kindred-portal","d":"2026-07-15"},{"r":"kindred-tasks-sandbox","d":"2026-07-14"},{"r":"solace-billing","d":"2026-07-10"},{"r":"solace","d":"2026-07-06"}],"Gm-Ads":[{"r":"gm-ads","d":"2026-07-15"},{"r":"growing-mindfully-ads","d":"2026-06-27"}],"Gm-Brightwheel":[{"r":"gm-brightwheel","d":"2026-07-14"}],"Sage":[{"r":"gm-sage","d":"2026-07-14"},{"r":"gm-reserve-campaign","d":"2026-07-13"},{"r":"gm-insurance-broker","d":"2026-07-11"},{"r":"sage","d":"2026-07-09"},{"r":"gm-presence","d":"2026-07-09"},{"r":"sage-agent","d":"2026-07-06"},{"r":"gm-reserve","d":"2026-06-30"},{"r":"gm-intranet","d":"2026-06-17"}]}};
-const CURATED_AGENT={insurance:['General','Drake'],houseops:['General','Hestia'],anchorage:['Winn.solutions','Atlas'],winnops:['Winn.solutions','Hermes'],gmads:['Growing Mindfully','Gm-Ads'],gmops:['Growing Mindfully','Sage'],kindred:['Growing Mindfully','Gm-Kindred'],gmweb:['Growing Mindfully','Gm-Website']};
-const CURATED_REPO={insurance:['winn-insurance','drake','policy-pilot'],houseops:['house-ops'],anchorage:['anchorage-workspace'],winnops:['hermes-chase'],gmads:['gm-ads'],gmops:['gm-sage'],kindred:['kindred-portal'],gmweb:['growingmindfully']};
+const CURATED_AGENT={insurance:['General','Drake'],houseops:['General','Hestia'],anchorage:['Winn.solutions','Atlas'],winnops:['Winn.solutions','Hermes'],gmads:['Growing Mindfully','Gm-Ads'],gmops:['Growing Mindfully','Sage'],kindred:['Growing Mindfully','Gm-Kindred'],presence:['Growing Mindfully','Gm-Kindred'],gmweb:['Growing Mindfully','Gm-Website']};
+const CURATED_REPO={insurance:['winn-insurance','drake','policy-pilot'],houseops:['house-ops'],anchorage:['anchorage-workspace'],winnops:['hermes-chase'],gmads:['gm-ads'],gmops:['gm-sage'],kindred:['kindred-portal','solace-api','solace','solace-billing','kindred-tasks-sandbox'],presence:['gm-presence','presence-mockup-1732d6'],gmweb:['growingmindfully','gm-waitlist','gm-master','gm-waitlist-audit','growingmindfully-website']};
 const openGroups=new Set(['General|Drake','Winn.solutions|Atlas']);
-const ORDER=['insurance','houseops','anchorage','winnops','gmads','gmops','kindred','gmweb'];
+const ORDER=['insurance','houseops','anchorage','winnops','gmads','gmops','kindred','presence','gmweb'];
 let current='insurance';
 const $=id=>document.getElementById(id);
 
@@ -459,12 +516,30 @@ function repoProject(org,agent,repo,d){
     tasks:[],msgs:[{who:agent+' \u00b7 '+d,html:'This workspace is imported and mapped to me. Nothing is running right now \u2014 message me here to start work in it.'}],
     engine:[['import.scan','surfaced \u2192 mapped','organized under '+agent+' ('+org+')']]};
 }
+const showAll=new Set();
+function moveRepo(repoName,toOrg,toAgent){
+  for(const org in REPO_IMPORT)for(const agent in REPO_IMPORT[org]){
+    const i=REPO_IMPORT[org][agent].findIndex(r=>r.r===repoName);
+    if(i>=0){
+      const [r]=REPO_IMPORT[org][agent].splice(i,1);
+      REPO_IMPORT[toOrg]=REPO_IMPORT[toOrg]||{};
+      REPO_IMPORT[toOrg][toAgent]=REPO_IMPORT[toOrg][toAgent]||[];
+      REPO_IMPORT[toOrg][toAgent].unshift(r);
+      try{localStorage.setItem('eagRepoImport',JSON.stringify(REPO_IMPORT));}catch(e){}
+      toast(`${repoName} \u2192 ${toAgent} (${toOrg}) \u2014 live build re-routes context + board`);
+      renderSidebar(); return;
+    }
+  }
+}
+try{const saved=localStorage.getItem('eagRepoImport'); if(saved)Object.assign(REPO_IMPORT,JSON.parse(saved));}catch(e){}
 function renderSidebar(){
   const sb=$('sidebar'); sb.innerHTML='<h1>Executive Console</h1>';
+  const CURATED_ALL=new Set(Object.values(CURATED_REPO).flat());
   const orgs=['General','Winn.solutions','Growing Mindfully'];
   for(const org of orgs){
     const o=document.createElement('div');o.className='org';o.textContent=org;sb.appendChild(o);
-    // agents in this org = union of curated + imported
+    o.ondragover=e=>{e.preventDefault();o.classList.add('dragover');};
+    o.ondragleave=()=>o.classList.remove('dragover');
     const agents=new Set();
     for(const k of ORDER){if(CURATED_AGENT[k][0]===org)agents.add(CURATED_AGENT[k][1]);}
     for(const a in (REPO_IMPORT[org]||{}))agents.add(a);
@@ -475,11 +550,13 @@ function renderSidebar(){
       const key=org+'|'+agent;
       const repos=(REPO_IMPORT[org]||{})[agent]||[];
       const curated=ORDER.filter(k=>CURATED_AGENT[k][0]===org&&CURATED_AGENT[k][1]===agent);
-      const curatedRepos=new Set(curated.flatMap(k=>CURATED_REPO[k]||[]));
-      const extraRepos=repos.filter(r=>!curatedRepos.has(r.r));
+      const extraRepos=repos.filter(r=>!CURATED_ALL.has(r.r));
       const h=document.createElement('div');h.className='agent-h'+(openGroups.has(key)?' open':'');
       h.innerHTML=`<span class="tw">\u25b6</span><span class="a-name">${agent}</span><span class="a-count">${curated.length+extraRepos.length}</span>`;
       h.onclick=()=>{openGroups.has(key)?openGroups.delete(key):openGroups.add(key);renderSidebar();};
+      h.ondragover=e=>{e.preventDefault();h.classList.add('dragover');};
+      h.ondragleave=()=>h.classList.remove('dragover');
+      h.ondrop=e=>{e.preventDefault();h.classList.remove('dragover');const r=e.dataTransfer.getData('repo');if(r)moveRepo(r,org,agent);};
       sb.appendChild(h);
       const kids=document.createElement('div');kids.className='agent-kids';
       for(const k of curated){
@@ -488,14 +565,24 @@ function renderSidebar(){
         d.style.paddingLeft='26px';
         d.innerHTML=`<span class="p-name"><span class="dot ${pd.needsClear?'ok':''}"></span>${pd.name}</span>`;
         d.onclick=e=>{e.stopPropagation();current=k;renderAll();};
+        d.ondragover=e=>e.preventDefault();
+        d.ondrop=e=>{e.preventDefault();const r=e.dataTransfer.getData('repo');if(r)moveRepo(r,org,agent);};
         kids.appendChild(d);
       }
-      for(const r of extraRepos){
+      const cap=showAll.has(key)?extraRepos.length:6;
+      for(const r of extraRepos.slice(0,cap)){
         const id='repo:'+r.r;
         const d=document.createElement('div');d.className='repo-row'+(current===id?' active':'');
-        d.innerHTML=`<span>${r.r}</span><span class="r-d">${r.d.slice(5)}</span>`;
+        d.draggable=true;
+        d.innerHTML=`<span>\u22ee\u22ee ${r.r}</span><span class="r-d">${r.d.slice(5)}</span>`;
         d.onclick=e=>{e.stopPropagation();DATA[id]=DATA[id]||repoProject(org,agent,r.r,r.d);current=id;renderAll();};
+        d.ondragstart=e=>e.dataTransfer.setData('repo',r.r);
         kids.appendChild(d);
+      }
+      if(extraRepos.length>6&&!showAll.has(key)){
+        const m=document.createElement('div');m.className='showmore';m.textContent=`Show all ${extraRepos.length}\u2026`;
+        m.onclick=()=>{showAll.add(key);renderSidebar();};
+        kids.appendChild(m);
       }
       sb.appendChild(kids);
     }
@@ -507,32 +594,58 @@ function renderMain(){
   $('pTitle').textContent=p.name; $('pRunby').textContent=`Run by ${p.agent}`;
   const pl=$('pipeline'); pl.innerHTML='';
   p.phases.forEach((ph,i)=>{
-    if(i>0){const g=document.createElement('div');g.className='gate'+(ph._fired?' fired':'');g.textContent=ph._fired?'✔':'➜';g.id='gate'+i;pl.appendChild(g);}
+    if(i>0){const g=document.createElement('div');g.className='gate'+(ph._fired?' fired':'');g.textContent=ph._fired?'\u2714':'\u279c';pl.appendChild(g);}
     const d=document.createElement('div');
     d.className='phase '+(ph.state==='human'?'human ':'')+(ph.state==='waiting'?'waiting':'')+(ph.state==='active'?'active':'');
-    d.id='phase'+i;
-    d.innerHTML=(ph.state==='human'?'<div style="font-size:18px;margin-bottom:4px">🧑</div>':'')+
+    d.innerHTML=(ph.state==='human'?'<div style="font-size:18px;margin-bottom:4px">\uD83E\uDDD1</div>':'')+
       `<div class="ph-name">${ph.name}</div><div class="ph-meta">${ph.meta}</div>`+
       (ph.state!=='human'?`<div class="bar"><i style="width:${ph.pct}%"></i></div>`:'');
-    d.onclick=()=>{document.querySelectorAll('.phase').forEach(x=>x.classList.remove('selected'));d.classList.add('selected');
-      $('boardTitle').textContent=ph.state==='human'?'Your review — what will arrive here':ph.name;
-      toast(ph.state==='waiting'?'Phase is waiting on the gate before it':'Showing '+ph.name);};
     pl.appendChild(d);
   });
   $('rollup').innerHTML=`<span>Overall <b>${p.overall}</b></span><span>${p.remaining}</span>`;
   const bw=$('boardWrap');
-  bw.innerHTML=`<div class="section-h" id="boardTitle">${p.boardTitle}</div><div class="board" id="board"></div>`;
-  const b=$('board');
-  if(!p.tasks.length){b.outerHTML='<div class="empty">Nothing on the board for this phase yet.</div>';return;}
-  p.tasks.forEach((t,ti)=>{
-    const done=t.doneCount>=t.total;
-    const d=document.createElement('div');d.className='card';
-    d.innerHTML=`<div class="c-top"><div class="c-name">${t.name}</div>
-      <span class="pill ${done?'done':(t.doneCount>0?'prog':'q')}">${done?'Done':(t.doneCount>0?'In progress':'Queued')}</span></div>
-      <div class="ticks"><span class="on">${'●'.repeat(t.doneCount)}</span><span class="off">${'●'.repeat(t.total-t.doneCount)}</span></div>
-      <div class="c-check">${t.doneCount}/${t.total} · ${t.note}</div>`;
-    d.onclick=()=>openSheet(t);
-    b.appendChild(d);
+  const arts=projectArtifacts(p);
+  bw.innerHTML=`<div class="tabs">
+      <span class="tab ${mainTab==='board'?'on':''}" onclick="mainTab='board';renderMain()">Board</span>
+      <span class="tab ${mainTab==='artifacts'?'on':''}" onclick="mainTab='artifacts';renderMain()">Artifacts \u00b7 ${arts.length}</span>
+    </div><div id="tabBody"></div>`;
+  const body=$('tabBody');
+  if(mainTab==='artifacts'){
+    body.innerHTML=arts.length?`<div class="art-grid">${arts.map((a,i)=>
+      `<div class="art-card" data-i="${i}"><div class="a-kind">${a.kind==='email'?'\u2709\uFE0F Email':'\uD83D\uDCC4 Document'}</div>
+       <div class="a-title">${a.title}</div><div class="a-src">from ${a.src}</div></div>`).join('')}</div>`
+      :'<div class="empty">No artifacts produced in this project yet.</div>';
+    body.querySelectorAll('.art-card').forEach(c=>c.onclick=()=>{
+      const a=arts[+c.dataset.i];
+      const sh=$('sheet');
+      sh.innerHTML=`<button class="t-close" onclick="document.getElementById('sheetBg').classList.remove('open')">\u00d7</button>
+        <div class="t-head"><div class="t-crumb">${p.org} / ${p.name} / Artifacts</div><h3>${a.title}</h3></div>
+        <div class="t-main" style="padding:20px 26px;overflow-y:auto"><div class="t-desc">${a.body}</div>
+        <div class="side-sec" style="margin-top:18px">Produced by</div><div style="font-size:13px">${a.src} \u00b7 ${p.agent}</div></div>`;
+      $('sheetBg').classList.add('open');
+    });
+    return;
+  }
+  if(!p.tasks.length){body.innerHTML='<div class="empty">Nothing on the board yet \u2014 message '+p.agent+' to start work here.</div>';return;}
+  const cols=[['q','To do'],['prog','In progress'],['done','Complete']];
+  body.innerHTML=`<div class="kanban">${cols.map(([k,label])=>{
+    const ts=p.tasks.filter(t=>statusOf(t)===k);
+    return `<div class="kcol" data-col="${k}"><div class="k-h"><span>${label}</span><span>${ts.length}</span></div>
+      ${ts.map(t=>`<div class="card" draggable="true" data-task="${t.id}">${cardHTML(t)}</div>`).join('')}</div>`;}).join('')}</div>`;
+  body.querySelectorAll('.card').forEach(c=>{
+    c.onclick=()=>openSheet(p.tasks.find(t=>t.id===c.dataset.task));
+    c.ondragstart=e=>{e.dataTransfer.setData('task',c.dataset.task);c.classList.add('dragging');};
+    c.ondragend=()=>c.classList.remove('dragging');
+  });
+  body.querySelectorAll('.kcol').forEach(col=>{
+    col.ondragover=e=>{e.preventDefault();col.classList.add('dragover');};
+    col.ondragleave=()=>col.classList.remove('dragover');
+    col.ondrop=e=>{e.preventDefault();col.classList.remove('dragover');
+      const t=p.tasks.find(x=>x.id===e.dataTransfer.getData('task')); if(!t)return;
+      const k=col.dataset.col;
+      t.doneCount=k==='done'?t.total:(k==='prog'?Math.max(1,Math.min(t.doneCount,t.total-1)):0);
+      toast(`${t.name} \u2192 ${k==='done'?'Complete':(k==='prog'?'In progress':'To do')} (mockup \u2014 live build writes to ClickUp)`);
+      renderMain();};
   });
 }
 function renderChat(){
@@ -601,6 +714,12 @@ function openSheet(t){
   const hist=genHistory(t,agent);
   const subs=t.subtasks||[];
   const ia=t.itemArtifacts||{};
+  // build TIMELINE: emails + human moments + milestones (artifact-first view)
+  const tl=hist.map(h=>{
+    const isMail=h.artifact&&h.artifact.kind==='email';
+    const cls=h.type==='human'?'human':(isMail?(h.who==='Broker'||/repl/i.test(h.what)?'recv':'sent'):'');
+    return {h,isMail,cls};
+  });
   const s=$('sheet');
   s.innerHTML=`
     <button class="t-close" onclick="document.getElementById('sheetBg').classList.remove('open')">\u00d7</button>
@@ -610,43 +729,55 @@ function openSheet(t){
     </div>
     <div class="t-body">
       <div class="t-main">
-        <div class="t-sec">Description</div>
-        <div class="t-desc">${t.desc}</div>
-        ${subs.length?`<div class="t-sec">Subtasks \u00b7 ${subs.filter(x=>x.done>=x.total).length}/${subs.length} complete</div>`+
+        <div class="t-sec">Timeline</div>
+        <div class="tl">
+          ${tl.map(({h,isMail,cls})=>{
+            if(isMail){
+              return `<div class="tl-item ${cls}"><span class="tl-dot"></span>
+                <div class="tl-meta"><b>${h.who}</b> \u00b7 ${h.t}${h.ev?' \u00b7 '+h.ev:''}</div>
+                <div class="mail"><div class="mail-h" onclick="this.parentElement.classList.toggle('open')">
+                  <span class="m-sub">${h.artifact.title}</span><span class="m-dir ${cls==='recv'?'in':'out'}">${cls==='recv'?'RECEIVED':'SENT'}</span></div>
+                  <div class="mail-b">${h.artifact.body}</div></div></div>`;
+            }
+            const docChip=h.artifact?artifactHTML(h.artifact):'';
+            return `<div class="tl-item ${cls}"><span class="tl-dot"></span>
+              <div class="tl-meta"><b>${h.who}</b> ${h.what} \u00b7 ${h.t}${h.ev?' \u00b7 '+h.ev:''}</div>${h.q?`<div class="tl-note">${h.q}</div>`:''}${docChip}</div>`;
+          }).join('')}
+        </div>
+      </div>
+      <div class="t-side">
+        <div class="fields-compact">
+          <div class="f-row"><div class="f-k">Status</div><div class="f-v"><span class="pill ${done?'done':(t.doneCount>0?'prog':'q')}">${done?'Done':(t.doneCount>0?'In progress':'Queued')}</span></div></div>
+          <div class="f-row"><div class="f-k">Agent</div><div class="f-v"><span class="agent-chip"><span class="av">${agent[0].toUpperCase()}</span>${agent}</span></div></div>
+          <div class="f-row"><div class="f-k">Priority</div><div class="f-v">${t.priority==='Urgent'?'\uD83D\uDD34 Urgent':t.priority}</div></div>
+          <div class="f-row"><div class="f-k">Due</div><div class="f-v">${t.due}</div></div>
+        </div>
+        <div class="bar" style="margin-top:6px"><i style="width:${Math.round(t.doneCount/t.total*100)}%"></i></div>
+        <div class="side-sec">Task list \u00b7 ${t.doneCount}/${t.total} complete</div>
+        <div class="side-check">
+          ${t.items.map((it,i)=>{
+            const name=typeof it==='string'?it:it.name;
+            const art=ia[name];
+            return `<div class="s-item ${i<t.doneCount?'done':''}"><div class="box">${i<t.doneCount?'\u2713':''}</div>
+              <div>${name}${art&&i<t.doneCount?artifactHTML(art):''}</div></div>`;}).join('')}
+        </div>
+        ${subs.length?`<div class="side-sec">Subtasks \u00b7 ${subs.filter(x=>x.done>=x.total).length}/${subs.length} complete</div>`+
           subs.map(st=>{
             const sd=st.done>=st.total;
             return `<div class="sub-row" onclick="this.classList.toggle('open')">
               <div class="sub-top"><span class="sub-name">${st.name}</span>
                 <span class="pill ${sd?'done':(st.done>0?'prog':'q')}">${st.status||(sd?'Done':'In progress')}</span></div>
-              <div class="sub-meta">${st.done}/${st.total} steps \u00b7 tap to expand</div>
+              <div class="sub-meta">${st.done}/${st.total} steps</div>
               <div class="bar" style="margin-top:6px"><i style="width:${Math.round(st.done/st.total*100)}%"></i></div>
               <div class="sub-items">${st.items.map((it,i)=>`<div class="s-item ${i<st.done?'done':''}"><div class="box">${i<st.done?'\u2713':''}</div><div>${it}</div></div>`).join('')}</div>
             </div>`;}).join(''):''}
-        <div class="t-sec">Checklist \u00b7 ${t.doneCount}/${t.total}</div>
-        ${t.items.map((it,i)=>{
-          const name=typeof it==='string'?it:it.name;
-          const art=ia[name];
-          return `<div class="s-item ${i<t.doneCount?'done':''}"><div class="box">${i<t.doneCount?'\u2713':''}</div>
-            <div>${name}${i<t.doneCount?`<span class="ev">evidence \u00b7 ledger event, auditable</span>`:''}
-            ${art&&i<t.doneCount?artifactHTML(art):''}</div></div>`;}).join('')}
-        <div class="t-sec">Activity</div>
-        <div class="act">
-          ${hist.map(h=>`<div class="a-row ${h.type||''}"><span class="a-dot"></span><b>${h.who}</b> ${h.what}<span class="a-t">${h.t}</span>${h.ev?`<span class="a-t">\u00b7 ${h.ev}</span>`:''}${h.q?`<span class="a-quote">${h.q}</span>`:''}${h.artifact?artifactHTML(h.artifact):''}</div>`).join('')}
-        </div>
-      </div>
-      <div class="t-side">
-        <div class="f-row"><div class="f-k">Status</div><div class="f-v"><span class="pill ${done?'done':(t.doneCount>0?'prog':'q')}">${done?'Done':(t.doneCount>0?'In progress':'Queued')}</span></div></div>
-        <div class="f-row"><div class="f-k">Agent</div><div class="f-v"><span class="agent-chip"><span class="av">${agent[0].toUpperCase()}</span>${agent}</span></div></div>
-        <div class="f-row"><div class="f-k">Priority</div><div class="f-v">${t.priority==='Urgent'?'\uD83D\uDD34 Urgent':t.priority}</div></div>
-        <div class="f-row"><div class="f-k">Created</div><div class="f-v">${t.created}</div></div>
-        <div class="f-row"><div class="f-k">Due</div><div class="f-v">${t.due}</div></div>
-        <div class="f-row"><div class="f-k">Phase</div><div class="f-v">${p.boardTitle}</div></div>
-        <div class="f-row"><div class="f-k">Subtasks</div><div class="f-v">${subs.length?subs.filter(x=>x.done>=x.total).length+'/'+subs.length+' done':'\u2014'}</div></div>
-        <div class="f-row"><div class="f-k">Progress</div><div class="f-v">${Math.round(t.doneCount/t.total*100)}%</div><div class="bar" style="margin-top:5px"><i style="width:${Math.round(t.doneCount/t.total*100)}%"></i></div></div>
-        <div class="f-row"><div class="f-k">Source</div><div class="f-v" style="font-size:12px;color:var(--ink-2)">ClickUp task (mirrored live)</div></div>
+        <div class="side-sec">Description</div>
+        <div style="font-size:12px;color:var(--ink-2);line-height:1.55">${t.desc}</div>
       </div>
     </div>
     <div class="t-foot"><input placeholder="Comment \u2014 goes to ${agent} and onto the task\u2026" onkeydown="if(event.key==='Enter'&&this.value.trim()){toast('Comment posted to the task (mockup)');this.value='';}"></div>`;
+  // emails default-open when there are 2 or fewer
+  const mails=s.querySelectorAll('.mail'); if(mails.length&&mails.length<=3)mails.forEach(m=>m.classList.add('open'));
   $('sheetBg').classList.add('open');
 }
 $('sheetBg').onclick=e=>{if(e.target.id==='sheetBg')$('sheetBg').classList.remove('open');};
