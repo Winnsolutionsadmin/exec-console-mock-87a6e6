@@ -114,17 +114,47 @@
   .ticks{letter-spacing:2px;font-size:10.5px;margin-top:5px}
   .ticks .on{color:var(--good)} .ticks .off{color:#d5d2ca}
   .empty{font-size:13px;color:var(--ink-2);padding:20px;border:1px dashed var(--line);border-radius:var(--radius);background:var(--panel)}
-  /* task sheet */
-  .sheet-bg{position:fixed;inset:0;background:rgba(28,28,30,.34);display:none;align-items:center;justify-content:center;z-index:20}
+  /* task detail (ClickUp-grade) */
+  .sheet-bg{position:fixed;inset:0;background:rgba(28,28,30,.38);display:none;align-items:center;justify-content:center;z-index:20;padding:20px}
   .sheet-bg.open{display:flex}
-  .sheet{background:var(--panel);border-radius:18px;width:min(440px,92vw);max-height:80vh;overflow-y:auto;padding:22px 24px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
-  .sheet h3{font-size:16px;font-weight:800;margin-bottom:2px}
-  .sheet .s-sub{font-size:12px;color:var(--ink-2);margin-bottom:16px}
-  .s-item{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}
+  .sheet{background:var(--panel);border-radius:18px;width:min(820px,96vw);max-height:88vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 70px rgba(0,0,0,.28)}
+  .t-head{padding:20px 26px 14px;border-bottom:1px solid var(--line)}
+  .t-crumb{font-size:11px;color:var(--ink-3);margin-bottom:6px;display:flex;gap:6px;align-items:center}
+  .t-crumb .tid{font-family:ui-monospace,Menlo,monospace;background:#f1efe9;border-radius:5px;padding:1px 6px}
+  .t-head h3{font-size:19px;font-weight:800;letter-spacing:-.01em;line-height:1.3}
+  .t-body{display:flex;min-height:0;flex:1}
+  .t-main{flex:1;min-width:0;overflow-y:auto;padding:18px 26px}
+  .t-side{width:230px;flex-shrink:0;border-left:1px solid var(--line);padding:18px 20px;overflow-y:auto;background:#fbfaf8}
+  .f-row{margin-bottom:14px}
+  .f-row .f-k{font-size:10.5px;font-weight:700;letter-spacing:.06em;color:var(--ink-3);text-transform:uppercase;margin-bottom:3px}
+  .f-row .f-v{font-size:13px;font-weight:600}
+  .f-v .pill{vertical-align:1px}
+  .agent-chip{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600}
+  .agent-chip .av{width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:800}
+  .t-sec{font-size:11px;font-weight:800;letter-spacing:.07em;color:var(--ink-3);text-transform:uppercase;margin:18px 0 9px}
+  .t-sec:first-child{margin-top:0}
+  .t-desc{font-size:13.5px;line-height:1.6;color:var(--ink)}
+  .s-item{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
   .s-item .box{width:18px;height:18px;border-radius:6px;border:1.5px solid #d5d2ca;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;margin-top:1px}
   .s-item.done .box{background:var(--good);border-color:var(--good);color:#fff}
   .s-item .ev{display:block;font-size:11px;color:var(--ink-3);margin-top:2px}
-  .s-close{margin-top:16px;font:inherit;font-size:12.5px;font-weight:700;color:var(--accent);background:none;border:none;cursor:pointer}
+  /* activity timeline */
+  .act{position:relative;padding-left:24px}
+  .act::before{content:'';position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:var(--line);border-radius:2px}
+  .a-row{position:relative;padding:7px 0;font-size:12.5px;color:var(--ink-2);line-height:1.45}
+  .a-row b{color:var(--ink);font-weight:650}
+  .a-row .a-dot{position:absolute;left:-21.5px;top:12px;width:9px;height:9px;border-radius:50%;background:#d5d2ca;border:2px solid var(--panel)}
+  .a-row.milestone .a-dot{background:var(--accent)}
+  .a-row.human .a-dot{background:var(--human)}
+  .a-row.good .a-dot{background:var(--good)}
+  .a-row .a-t{font-size:10.5px;color:var(--ink-3);margin-left:6px;white-space:nowrap}
+  .a-row .a-quote{display:block;background:#f4f2ee;border-radius:9px;padding:7px 11px;margin-top:5px;color:var(--ink);font-size:12.5px}
+  .t-foot{border-top:1px solid var(--line);padding:12px 26px;display:flex;gap:9px;align-items:center}
+  .t-foot input{flex:1;font:inherit;font-size:13px;border:1px solid var(--line);border-radius:10px;padding:9px 13px;outline:none;background:var(--bg)}
+  .t-foot input:focus{border-color:var(--accent)}
+  .t-close{position:absolute;top:14px;right:18px;font-size:20px;color:var(--ink-3);cursor:pointer;background:none;border:none;line-height:1}
+  .t-close:hover{color:var(--ink)}
+  @media (max-width:760px){ .t-body{flex-direction:column} .t-side{width:100%;border-left:0;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:0 26px} .f-row{min-width:130px} }
   .banner{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:12px;font-weight:600;border-radius:99px;padding:7px 16px;opacity:0;transition:opacity .4s;pointer-events:none;z-index:30}
   .banner.show{opacity:.92}
   .mock-tag{position:fixed;bottom:10px;right:12px;font-size:10px;color:var(--ink-3)}
@@ -165,7 +195,22 @@
 
 <script>
 const CHECK5=['draft','approved','sent','reply received','data extracted'];
-function task(name,doneCount,note,items){return{name,doneCount,total:(items||CHECK5).length,note,items:items||CHECK5};}
+let TID=104;
+function task(name,doneCount,note,items,extra){
+  const t={name,doneCount,total:(items||CHECK5).length,note,items:items||CHECK5,
+    id:'TASK-'+(TID++),priority:'Normal',due:'Jul 18',created:'Jul 11',
+    desc:'Owned end-to-end by the assigned agent; every state change below is a ledger event you can audit.',
+    history:null,...(extra||{})};
+  return t;
+}
+function genHistory(t,agent){
+  if(t.history)return t.history;
+  const h=[{type:'milestone',who:agent,what:'created this task and set the checklist',t:t.created+' · 9:04 AM'}];
+  t.items.forEach((it,i)=>{ if(i<t.doneCount) h.push({type:'good',who:agent,what:`completed <b>${it}</b>`,t:'Jul '+(12+Math.min(i,2))+' · '+(9+i)+':'+(17+i*9)+' AM',ev:'event #'+(1000+i*7)}); });
+  if(t.doneCount<t.total) h.push({type:'',who:agent,what:`is working on <b>${t.items[t.doneCount]}</b> — in progress now`,t:'today'});
+  else h.push({type:'milestone',who:agent,what:'marked the task <b>Done</b> — data pushed to the next phase',t:'today · 1:12 PM'});
+  return h;
+}
 
 const DATA={
   insurance:{org:'General',name:'Insurance',agent:'Drake',role:'Insurance operator — coverage, brokers, placements',
@@ -179,7 +224,18 @@ const DATA={
     boardTitle:'Broker outreach',
     tasks:[
       task('Broker: Acme Insurance',5,'quote received · <span class="next">pushed to aggregation</span>'),
-      task('Broker: Hartford (via Bunker)',5,'quote received · <span class="next">12% under budget, A+ rated</span>'),
+      task('Broker: Hartford (via Bunker)',5,'quote received · <span class="next">12% under budget, A+ rated</span>',null,{
+        id:'WINN-INS-002',priority:'Urgent',due:'Jul 15',created:'Jul 10',
+        desc:'Place CA Workers Comp for 4 W2 employees (statutory gap). Hartford quoted through the Bunker ministerial channel. Quote came in 12% under budget, carrier A+ rated by AM Best, able to bind this week.',
+        history:[
+          {type:'milestone',who:'Drake',what:'created this task from the coverage-requirements lock',t:'Jul 10 · 8:41 AM'},
+          {type:'good',who:'Drake',what:'completed <b>draft</b> — outreach email drafted in your voice',t:'Jul 10 · 9:02 AM',ev:'event #1007'},
+          {type:'human',who:'You',what:'approved the draft from the decision card',t:'Jul 10 · 11:26 AM',ev:'decision d-2214, exactly-once'},
+          {type:'good',who:'Drake',what:'completed <b>sent</b> — email delivered to broker',t:'Jul 10 · 11:27 AM',ev:'event #1014'},
+          {type:'',who:'Broker',what:'replied with quote attached',t:'Jul 12 · 2:19 PM',q:'"Happy to confirm: $ — annual, A+ paper, bindable this week pending signed app."'},
+          {type:'good',who:'Drake',what:'completed <b>data extracted</b> — premium, rating, bind window parsed to the comparison set',t:'Jul 12 · 2:31 PM',ev:'event #1028'},
+          {type:'milestone',who:'Drake',what:'marked <b>Done</b> — pushed to aggregation',t:'Jul 12 · 2:32 PM'}
+        ]}),
       task('Broker: Travelers',5,'quote received · <span class="next">broader endorsements</span>'),
       task('Broker: Beta Co.',5,'declined to quote · <span class="next">documented</span>'),
       task('Broker: Gamma LLC',4,'<span class="next">next: data extracted</span>')
@@ -454,11 +510,40 @@ function addMsg(who,html){
   $('msgs').appendChild(d); $('msgs').scrollTop=1e6;
 }
 function openSheet(t){
+  const p=DATA[current], agent=p.agent;
+  const done=t.doneCount>=t.total;
+  const hist=genHistory(t,agent);
   const s=$('sheet');
-  s.innerHTML=`<h3>${t.name}</h3><div class="s-sub">${t.doneCount}/${t.total} checklist items · ${DATA[current].agent} owns this task</div>`+
-    t.items.map((it,i)=>`<div class="s-item ${i<t.doneCount?'done':''}"><div class="box">${i<t.doneCount?'✓':''}</div>
-      <div>${it}${i<t.doneCount?`<span class="ev">evidence · event #${1000+i*7} in the ledger</span>`:''}</div></div>`).join('')+
-    `<button class="s-close" onclick="document.getElementById('sheetBg').classList.remove('open')">Close</button>`;
+  s.innerHTML=`
+    <button class="t-close" onclick="document.getElementById('sheetBg').classList.remove('open')">×</button>
+    <div class="t-head" style="position:relative">
+      <div class="t-crumb">${p.org} / ${p.name} / ${p.boardTitle} <span class="tid">${t.id}</span></div>
+      <h3>${t.name}</h3>
+    </div>
+    <div class="t-body">
+      <div class="t-main">
+        <div class="t-sec">Description</div>
+        <div class="t-desc">${t.desc}</div>
+        <div class="t-sec">Checklist · ${t.doneCount}/${t.total}</div>
+        ${t.items.map((it,i)=>`<div class="s-item ${i<t.doneCount?'done':''}"><div class="box">${i<t.doneCount?'✓':''}</div>
+          <div>${it}${i<t.doneCount?`<span class="ev">evidence · ledger event, auditable</span>`:''}</div></div>`).join('')}
+        <div class="t-sec">Activity</div>
+        <div class="act">
+          ${hist.map(h=>`<div class="a-row ${h.type||''}"><span class="a-dot"></span><b>${h.who}</b> ${h.what}<span class="a-t">${h.t}</span>${h.ev?`<span class="a-t">· ${h.ev}</span>`:''}${h.q?`<span class="a-quote">${h.q}</span>`:''}</div>`).join('')}
+        </div>
+      </div>
+      <div class="t-side">
+        <div class="f-row"><div class="f-k">Status</div><div class="f-v"><span class="pill ${done?'done':(t.doneCount>0?'prog':'q')}">${done?'Done':(t.doneCount>0?'In progress':'Queued')}</span></div></div>
+        <div class="f-row"><div class="f-k">Agent</div><div class="f-v"><span class="agent-chip"><span class="av">${agent[0].toUpperCase()}</span>${agent}</span></div></div>
+        <div class="f-row"><div class="f-k">Priority</div><div class="f-v">${t.priority==='Urgent'?'🔴 Urgent':t.priority}</div></div>
+        <div class="f-row"><div class="f-k">Created</div><div class="f-v">${t.created}</div></div>
+        <div class="f-row"><div class="f-k">Due</div><div class="f-v">${t.due}</div></div>
+        <div class="f-row"><div class="f-k">Phase</div><div class="f-v">${p.boardTitle}</div></div>
+        <div class="f-row"><div class="f-k">Progress</div><div class="f-v">${Math.round(t.doneCount/t.total*100)}%</div><div class="bar" style="margin-top:5px"><i style="width:${Math.round(t.doneCount/t.total*100)}%"></i></div></div>
+        <div class="f-row"><div class="f-k">Source</div><div class="f-v" style="font-size:12px;color:var(--ink-2)">ClickUp task (mirrored live)</div></div>
+      </div>
+    </div>
+    <div class="t-foot"><input placeholder="Comment — goes to ${agent} and onto the task…" onkeydown="if(event.key==='Enter'&&this.value.trim()){toast('Comment posted to the task (mockup)');this.value='';}"></div>`;
   $('sheetBg').classList.add('open');
 }
 $('sheetBg').onclick=e=>{if(e.target.id==='sheetBg')$('sheetBg').classList.remove('open');};
