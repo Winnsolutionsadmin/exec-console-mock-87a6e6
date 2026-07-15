@@ -588,6 +588,25 @@ function renderSidebar(){
     }
   }
 }
+let mainTab='board';
+function statusOf(t){return t.doneCount>=t.total?'done':(t.doneCount>0?'prog':'q');}
+function cardHTML(t){
+  const done=t.doneCount>=t.total;
+  return `<div class="c-top"><div class="c-name">${t.name}</div>
+    <span class="pill ${statusOf(t)}">${done?'Done':(t.doneCount>0?'In progress':'Queued')}</span></div>
+    <div class="ticks"><span class="on">${'\u25cf'.repeat(t.doneCount)}</span><span class="off">${'\u25cf'.repeat(Math.max(0,t.total-t.doneCount))}</span></div>
+    <div class="c-check">${t.doneCount}/${t.total} \u00b7 ${t.note}</div>`;
+}
+function projectArtifacts(p){
+  const arts=[];
+  for(const t of p.tasks){
+    const ia=t.itemArtifacts||{};
+    for(const k in ia)arts.push({...ia[k],src:t.name});
+    for(const h of (t.history||[]))if(h.artifact)arts.push({...h.artifact,src:t.name});
+  }
+  const seen=new Set();
+  return arts.filter(a=>{const k=a.title;if(seen.has(k))return false;seen.add(k);return true;});
+}
 function renderMain(){
   const p=DATA[current];
   $('crumb').textContent=`${p.org} / ${p.name}`;
